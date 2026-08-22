@@ -2,7 +2,17 @@ import streamlit as st
 from pypdf import PdfReader
 import chromadb
 import re
-import ollama
+from groq import Groq
+
+# --------------------------------------------------
+# GROQ AI CLIENT
+# --------------------------------------------------
+
+groq_client = Groq(
+    api_key=st.secrets["GROQ_API_KEY"]
+)
+
+MODEL = "openai/gpt-oss-20b"
 
 # --------------------------------------------------
 # PAGE CONFIGURATION
@@ -301,21 +311,21 @@ RECOMMENDATION:
             "🤖 AI is analyzing the document..."
         ):
 
-            response = ollama.chat(
-                model="gemma3",
+            response = groq_client.chat.completions.create(
+                model=MODEL,
                 messages=[
                     {
                         "role": "user",
                         "content": prompt
                     }
-                ]
+                ],
+                temperature=0.2,
+                max_completion_tokens=1024
             )
 
-        answer = response[
-            "message"
-        ][
-            "content"
-        ]
+            answer = response.choices[0].message.content
+
+        
 
         # --------------------------------------------------
         # DISPLAY RESULT
